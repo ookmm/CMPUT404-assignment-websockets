@@ -38,11 +38,10 @@ var wscounter = 0;
 var socket;
 
 function debug(str) {
-	 return
     var debugDiv = document.getElementById('debug');
     debugDiv.innerHTML = "" + str;
 }
-debug("Test");
+//debug("Test");
 
 world = {};
 
@@ -62,10 +61,6 @@ function drawCircle(context,entity) {
         gradient.addColorStop("0.5", "purple");
         gradient.addColorStop("1.0", "blue");
         strokeStyle = gradient;
-
-
-
-
         arc(x, y, (entity["radius"])?entity["radius"]:random_radius, 0, 2.0 * Math.PI, false);  
         stroke();
         fill();                                
@@ -287,12 +282,13 @@ function wsSetup() {
     };
     socket.onmessage = function(msg) {  
         try {
-            debug("WebSocket Recv:" + msg.data);
+            //debug("WebSocket Recv:" + msg.data);
             //XXX: TODO What are you going to do here? 
-            drawNextFrame();
             var parsed_data = JSON.parse(msg.data);
-            var key = Object.keys(parsed);
-            world[key]=parsed[key];           
+            var entity = Object.keys(parsed_data)[0];
+            var data = parsed_data[entity]
+            world[entity] = data;  
+            drawNextFrame();         
         } catch (e) {
             alert("socket on message: " + e);
         }
@@ -300,9 +296,6 @@ function wsSetup() {
 }
 
 wsSetup();
-
-
-
 
 // 30 frames per second
 setInterval( update, 1000/30.0);

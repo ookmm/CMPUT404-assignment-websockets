@@ -29,7 +29,6 @@ app.debug = True
 
 #Abram Hindle
 #https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py 
-clients = list()
 
 def send_all(msg):
     for client in clients:
@@ -48,7 +47,7 @@ class Client:
     def get(self):
         return self.queue.get()
 
-
+clients = list()
 
 class World:
     def __init__(self):
@@ -87,6 +86,7 @@ myWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
+    send_all_json({ entity:data })
 
 myWorld.add_set_listener( set_listener )
         
@@ -102,7 +102,6 @@ def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
     # XXX: TODO IMPLEMENT ME
 
-
     #Abram Hindle 
     #https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
     try:
@@ -113,21 +112,17 @@ def read_ws(ws,client):
                 myWorld.set(dictionary.keys()[0], dictionary.items()[0][1])
                 send_all_json(json.loads(msg))
             else:
-                break
+					break
     except:
         """Done"""
 
-
-
+#Abram Hindle 
+#https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
 @sockets.route('/subscribe')
 def subscribe_socket(ws):
     '''Fufill the websocket URL of /subscribe, every update notify the
        websocket and read updates from the websocket '''
-    # XXX: TODO IMPLEMENT ME
     
-
-    #Abram Hindle 
-    #https://github.com/abramhindle/WebSocketsExamples/blob/master/chat.py
     client = Client()
     clients.append(client)
     g = gevent.spawn( read_ws, ws, client )
