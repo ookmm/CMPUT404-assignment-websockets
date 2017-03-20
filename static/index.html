@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width" />
     <meta name="license" content="
         Copyright 2013 Google, Abram Hindle
+        COpyright 2017 Avery Tan, https://github.com/ookmm
         
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -37,6 +38,7 @@ var wscounter = 0;
 var socket;
 
 function debug(str) {
+	 return
     var debugDiv = document.getElementById('debug');
     debugDiv.innerHTML = "" + str;
 }
@@ -47,15 +49,26 @@ world = {};
 //XXX: TODO Make this prettier!
 function drawCircle(context,entity) {
     with(context) {
-        beginPath();                
+        beginPath();              
         lineWidth = 3;
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
-        fillStyle = entity["colour"];
-        strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        // fillStyle = entity["colour"];
+        // strokeStyle = fillStyle;
+        var random_radius = Math.floor((Math.random()*100)+50);
+        var gradient = createLinearGradient(0,0,canvas.width, canvas.height);
+        gradient.addColorStop("0", "pink");
+        gradient.addColorStop("0.5", "purple");
+        gradient.addColorStop("1.0", "blue");
+        strokeStyle = gradient;
+
+
+
+
+        arc(x, y, (entity["radius"])?entity["radius"]:random_radius, 0, 2.0 * Math.PI, false);  
+        stroke();
+        fill();                                
     }
 }
 
@@ -125,6 +138,10 @@ function addEntity(entity, data) {
     world[entity] = data;
     drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just modified!
+    var obj = {};
+    obj[entity] = data;
+    socket.send(JSON.stringify(obj));
+
 }
 var counter = 0;
 function addEntityWithoutName(data) {
@@ -231,21 +248,30 @@ mouse = (function() {
 // Add the application specific mouse listeners!
 //XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    var random_radius = Math.floor((Math.random()*100)+50);
+
+    addEntityWithoutName({'x':x,'y':y,'colour':'yellow', 'radius': random_radius});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    var random_radius = Math.floor((Math.random()*5)+10);
+
+    addEntityWithoutName({'x':x,'y':y,'colour':'red', 'radious': random_radius});
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'green',
-                          'radius':10});
+
+    var random_radius = Math.floor((Math.random()*100)+50);
+
+    addEntityWithoutName({'x':x,'y':y,'colour':'green','stroke-width' : 3,
+                          'radius':random_radius});
 });
+
 
 
 function update() {
     drawFrame();
+    drawNextFrame();
 }
 
 
@@ -254,6 +280,7 @@ function wsSetup() {
     socket = new WebSocket(url);
     socket.onopen = function() {
         //XXX: TODO What are you going to do here?
+        update()
     };
     socket.onerror = function(msg) {
         debug("WebSocket Error:" + msg.data);
@@ -261,7 +288,11 @@ function wsSetup() {
     socket.onmessage = function(msg) {  
         try {
             debug("WebSocket Recv:" + msg.data);
-            //XXX: TODO What are you going to do here?            
+            //XXX: TODO What are you going to do here? 
+            drawNextFrame();
+            var parsed_data = JSON.parse(msg.data);
+            var key = Object.keys(parsed);
+            world[key]=parsed[key];           
         } catch (e) {
             alert("socket on message: " + e);
         }
