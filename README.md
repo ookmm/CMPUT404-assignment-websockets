@@ -57,3 +57,5 @@ Contributors
 
 * Mark Galloway
 * Abram Hindle
+* Avery Tan
+* https://github.com/ookmm
